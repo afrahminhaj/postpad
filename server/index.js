@@ -1,14 +1,30 @@
 import express from "express";
-//import { bodyParser } from "body-parser";
+import bodyParser from "body-parser";
 import db from "mongoose";
 import cors from "cors";
 
-const app = express();
-// app.use(
-//     urlencoded({
-//         extended: true,
-//     })
-// );
+import postRoutes from './routes/posts.js'
 
-app.use(cors())
-app.listen('5000', () => { console.log('listening to port 5000') })
+const app = express();
+app.use(bodyParser.json({ limit: "30mb", extended: true }));
+app.use(
+    bodyParser.urlencoded({
+        extended: true,
+    })
+);
+app.use(cors());
+
+const PORT = process.env.PORT || 5000;
+
+db
+    .connect("mongodb://localhost:27017/postsdb")
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log("listening to port: " + PORT);
+        });
+    })
+    .catch((err) => {
+        console.log(err);
+    });
+
+app.use('/posts', postRoutes)
